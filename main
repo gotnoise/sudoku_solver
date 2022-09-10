@@ -1,0 +1,104 @@
+from tkinter import *
+
+
+def solution(puzzle):
+
+    # Αντικαθιστούμε στο puzzle όλες τις κενές θέσεις με μία λίστα:[1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+    for pos_x in range(0, 9):
+        for pos_y in range(0, 9):
+            if puzzle[pos_x][pos_y] == 0:
+                puzzle[pos_x][pos_y] = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+    # Για κάθε στοιχείο του puzzle ψάχνουμε να βρούμε λίστες για να τρέξουμε κάποιους ελέγχους.Αυτό θα
+    # επαναλαμβάνεται στο διηνεκές έως ότου αντικατασταθούν όλες οι λίστες με αριθμούς
+
+    not_solved = True
+    while not_solved:
+        for pos_x in range(0, 9):
+            for pos_y in range(0, 9):
+                if type(puzzle[pos_x][pos_y]) == list:
+
+                    # 1ος ΈΛΕΓΧΟΣ: Τσεκάρει οριζόντια και αφαιρεί απο τη λίστα τυχών αριθμούς
+                    # που εντοπίζει στην ίδια σειρά
+
+                    for k in puzzle[pos_x]:
+                        if k in puzzle[pos_x][pos_y] and type(k) is int:
+                            puzzle[pos_x][pos_y] = [z for z in puzzle[pos_x][pos_y] if z != k]
+
+                    # 2ος ΈΛΕΓΧΟΣ: Τσεκάρει κάθετα και αφαιρεί απο τη λίστα τυχών αριθμούς που
+                    # βρίσκει στην ίδια κολώνα
+
+                    vertically = [m[pos_y] for m in puzzle]
+                    for v in vertically:
+                        if v in puzzle[pos_x][pos_y] and type(v) is int:
+                            puzzle[pos_x][pos_y] = [z for z in puzzle[pos_x][pos_y] if z != v]
+
+                    # 2ος ΈΛΕΓΧΟΣ: Τσεκάρει στο κουτί και αφαιρεί σπο τη λίστα τυχών αριθμούς
+                    # που βρίσκει στο κουτί
+
+                    box = []
+                    box_x = puzzle[(pos_x // 3) * 3:(pos_x // 3) * 3 + 3]
+                    for b in box_x:
+                        box += b[(pos_y // 3) * 3:(pos_y // 3) * 3 + 3]
+                    for m in box:
+                        if m in puzzle[pos_x][pos_y] and type(m) is int:
+                            puzzle[pos_x][pos_y] = [z for z in puzzle[pos_x][pos_y] if z != m]
+
+        # Εφόσον τρέξαμε όλους τους ελέγχους τσεκάρουμε για τυχών λίστες στο puzzle.
+        # Α περίπτωση: αν δεν εντοπιστεί καμία λίστα το puzzle λύθηκε !
+        # Β περίπτωση: αν εντοπιστεί λίστα τσεκάρει αν αποτελείτε απο ένα
+        # μόνο στοιχείο και αντικαθιστά τη λίστα με το στοιχείο αυτό.
+
+        not_solved = False
+        for pos_x in range(0, 9):
+            for pos_y in range(0, 9):
+                if type(puzzle[pos_x][pos_y]) == list:
+                    not_solved = True
+                    if len(puzzle[pos_x][pos_y]) == 1:
+                        puzzle[pos_x][pos_y] = puzzle[pos_x][pos_y][0]
+    return puzzle
+
+
+window = Tk()
+window.title("Sudoku Solver")
+window.minsize(width=200, height=200)
+window.config(bg="#F2D388")
+
+table, sudoku_table = [], []
+for x in range(9):
+    for y in range(9):
+        entry = Entry()
+        entry.grid(column=y, row=x, ipadx=3, ipady=3)
+        entry.config(width=2, bd=5, font=25, justify="center", bg="#A7D2CB", fg="black")
+        table.append(entry)
+
+for num in range(0, 81, 9):
+    sudoku_table.append(table[num:num + 9])
+
+
+def solve():
+    table_a, table_b = [], []
+    for column in sudoku_table:
+        for number in column:
+            if number.get() not in ["1", "2", "3", "4", "5", "6", "7", "8", "9"]:
+                table_a.append(0)
+            else:
+                table_a.append(int(number.get()))
+    for number in range(0, 81, 9):
+        table_b.append(table_a[number:number + 9])
+    final_solution = solution(table_b)
+    for pos_x in range(0, 9):
+        for pos_y in range(0, 9):
+            if sudoku_table[pos_x][pos_y].get() not in ["1", "2", "3", "4", "5", "6", "7", "8", "9"]:
+                sudoku_table[pos_x][pos_y].config(fg="#C98474")
+                sudoku_table[pos_x][pos_y].insert(0, final_solution[pos_x][pos_y])
+
+
+button = Button(text="solve", command=solve, bg="#C98474", fg="black",
+                activebackground="#C98474", width=20, height=2)
+button.config(width=10, bd=7)
+button["font"] = ("Helvetica", 10, "bold")
+button.grid(column=0, row=10, columnspan=9)
+
+window.mainloop()
