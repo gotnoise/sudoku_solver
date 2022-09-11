@@ -1,5 +1,5 @@
 def solution(puzzle):
-    time_to_run = 0
+
 
     # We replace all the blanks in the puzzle with a list:[1, 2, 3, 4, 5, 6, 7, 8, 9]
 
@@ -10,7 +10,8 @@ def solution(puzzle):
 
     # For each item of the puzzle we look for lists to run some checks on.
     # This will repeat forever until all lists are replaced with numbers
-
+    
+    check_solution = []
     not_solved = True
     while not_solved:
         for pos_x in range(0, 9):
@@ -60,12 +61,11 @@ def solution(puzzle):
                             puzzle[pos_x][pos_y] = nums
                             break
 
-        # we repeat the process 1000 times
-
-        time_to_run += 1
-        if time_to_run == 1000:
+        if puzzle == check_solution:
             not_solved = False
-            print(puzzle)
+        else:
+            check_solution = puzzle
+            
     return puzzle
 
 
